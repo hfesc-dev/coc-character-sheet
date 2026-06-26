@@ -7,7 +7,9 @@ import {
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
   signOut,
-  onAuthStateChanged 
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup
 } from 'firebase/auth';
 
 export const authService = {
@@ -20,6 +22,13 @@ export const authService = {
   login: async (email, password) => {
     if (!isFirebaseConfigured()) throw new Error('Firebase not configured');
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    return userCredential.user;
+  },
+
+  loginWithGoogle: async () => {
+    if (!isFirebaseConfigured()) throw new Error('Firebase not configured');
+    const provider = new GoogleAuthProvider();
+    const userCredential = await signInWithPopup(auth, provider);
     return userCredential.user;
   },
 

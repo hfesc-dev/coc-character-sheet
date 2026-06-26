@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, SafeAreaView, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, SafeAreaView, Alert, ActivityIndicator, Platform } from 'react-native';
 import { theme } from '../theme';
 import { authService } from '../services/authService';
 
@@ -46,6 +46,24 @@ export default function LoginScreen({ navigation }) {
       else if (msg.includes('auth/email-already-in-use')) msg = 'This email is already registered. Try signing in.';
       else if (msg.includes('auth/invalid-email')) msg = 'Please enter a valid email address.';
       Alert.alert('Authentication Error', msg);
+    }
+  };
+
+  const handleGoogleAuth = async () => {
+    if (Platform.OS !== 'web') {
+      Alert.alert('Not Supported', 'Google Sign-In via app requires native configuration. Please use Email/Password or play on Web.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await authService.loginWithGoogle();
+      // The onAuthChange listener will handle the redirect
+    } catch (error) {
+      setLoading(false);
+      if (error.code !== 'auth/popup-closed-by-user') {
+        Alert.alert('Google Sign-In Error', error.message);
+      }
     }
   };
 
@@ -110,7 +128,7 @@ export default function LoginScreen({ navigation }) {
             <View style={styles.dividerLine} />
           </View>
 
-          <TouchableOpacity style={styles.googleButton} onPress={() => Alert.alert('Google Auth', 'Google Sign-In logic goes here (requires native config or expo-auth-session).')}>
+          <TouchableOpacity style={styles.googleButton} onPress={handleGoogleAuth}>
             <Text style={styles.googleButtonText}>Sign in with Google</Text>
           </TouchableOpacity>
 
